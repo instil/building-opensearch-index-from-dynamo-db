@@ -24,7 +24,7 @@ Or if you are using CDK, here is an example of the table with a stream event:
 After this you just need to tell the stream where you want it to go:
 
 ```
-  this.yourIndexingLambdaFunction.addEventSource(new DynamoEventSource(this.someTable, {
+  yourIndexingLambdaFunction.addEventSource(new DynamoEventSource(this.someTable, {
     startingPosition: StartingPosition.TRIM_HORIZON,
     batchSize: 1,
     retryAttempts: 3
@@ -32,7 +32,7 @@ After this you just need to tell the stream where you want it to go:
 ```
 PLEASE NOTE: you must give the correct privileges to this lambda:
 ```
-    this.yourOpenSearchDomain.grantIndexReadWrite("your-index", this.yourIndexingLambdaFunction);
+    yourOpenSearchDomain.grantIndexReadWrite("your-index", yourIndexingLambdaFunction);
 ```
 
 ### Deleting an index
@@ -42,7 +42,7 @@ recommend just manually triggering it from the console when you need to.
 
 PLEASE NOTE: you must give the correct privileges to this lambda:
 ```
-    this.yourOpenSearchDomain.grantReadWrite(this.yourDeleteIndexLambdaFunction);
+    yourOpenSearchDomain.grantReadWrite(yourDeleteIndexLambdaFunction);
 ```
 
 ### Indexing existing data
@@ -54,6 +54,6 @@ or updatedOn etc)
 
 PLEASE NOTE: you must give the correct privileges to this lambda:
 ```
-  this.yourOpenSearchDomain.grantIndexReadWrite("your-index", this.yourIndexDataLambdaFunction);
-  this.indexMeTable.grantReadData(this.openSearchIndexPoliciesFunction.lambdaFunction);
+  yourOpenSearchDomain.grantIndexReadWrite("your-index", yourIndexDataLambdaFunction);
+  indexMeTable.grantReadData(openSearchIndexPoliciesFunction.lambdaFunction);
 ```
