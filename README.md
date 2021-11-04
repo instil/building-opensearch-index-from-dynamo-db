@@ -55,5 +55,5 @@ or updatedOn etc)
 PLEASE NOTE: you must give the correct privileges to this lambda:
 ```
   yourOpenSearchDomain.grantIndexReadWrite("your-index", yourIndexDataLambdaFunction);
-  indexMeTable.grantReadData(openSearchIndexPoliciesFunction.lambdaFunction);
+  indexMeTable.grantReadData(yourIndexDataLambdaFunction);
 ```
