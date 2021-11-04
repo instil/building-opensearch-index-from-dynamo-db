@@ -9,7 +9,7 @@ import {YourDocumentType} from "../service/OpenSearchService";
 export const dynamoDb = new DynamoDB({region: "your-region"});
 export const dynamoMapper = new DataMapper({client: dynamoDb});
 
-@table("some-table")
+@table("index-me")
 export class YourDocumentTableObject {
     @hashKey()
     partitionKey!: string;
