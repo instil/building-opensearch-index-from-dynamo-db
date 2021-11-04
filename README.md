@@ -11,30 +11,24 @@ https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html#St
 Or if you are using CDK, here is an example of the table with a stream event:
 
 ```
-  readonly someTable = new Table(this, "SomeTable", {
-    tableName: "some-table",
+  const indexMe = new dynamodb.Table(this, "IndexMeTable", {
+    tableName: "index-me",
     billingMode: BillingMode.PAY_PER_REQUEST,
-    partitionKey: {
-      name: "partitionKey",
-      type: AttributeType.STRING
-    },
-    sortKey: {
-      name: "sortKey",
-      type: AttributeType.STRING
-    },
+    partitionKey: {name: "partitionKey", type: AttributeType.STRING},
+    sortKey: {name: "sortKey", type: AttributeType.STRING},
     pointInTimeRecovery: true,
-    stream: StreamViewType.NEW_IMAGE, // this is all it takes to create a stream 
+    stream: StreamViewType.NEW_IMAGE // This is the important line!
   });
 ```
 
 After this you just need to tell the stream where you want it to go:
 
 ```
-    this.yourIndexingStreamLambdaFunction.addEventSource(new DynamoEventSource(this.someTable, {
-      startingPosition: StartingPosition.TRIM_HORIZON,
-      batchSize: 1,
-      retryAttempts: 3
-    }));
+  this.yourIndexingLambdaFunction.addEventSource(new DynamoEventSource(this.someTable, {
+    startingPosition: StartingPosition.TRIM_HORIZON,
+    batchSize: 1,
+    retryAttempts: 3
+  }));
 ```
 
 ### Deleting an index
