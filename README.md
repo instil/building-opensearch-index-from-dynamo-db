@@ -11,7 +11,7 @@ https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html#St
 Or if you are using CDK, here is an example of the table with a stream event:
 
 ```
-  const indexMe = new dynamodb.Table(this, "IndexMeTable", {
+  const indexMeTable = new dynamodb.Table(this, "IndexMeTable", {
     tableName: "index-me",
     billingMode: BillingMode.PAY_PER_REQUEST,
     partitionKey: {name: "partitionKey", type: AttributeType.STRING},
@@ -30,11 +30,20 @@ After this you just need to tell the stream where you want it to go:
     retryAttempts: 3
   }));
 ```
+PLEASE NOTE: you must give the correct privileges to this lambda:
+```
+    this.yourOpenSearchDomain.grantIndexReadWrite("your-index", this.yourIndexingLambdaFunction);
+```
 
 ### Deleting an index
 
 Inside the `delete-index` folder you will find another lambda. This one can be set up to have a trigger, however I would
 recommend just manually triggering it from the console when you need to.
+
+PLEASE NOTE: you must give the correct privileges to this lambda:
+```
+    this.yourOpenSearchDomain.grantReadWrite(this.yourDeleteIndexLambdaFunction);
+```
 
 ### Indexing existing data
 
@@ -42,3 +51,9 @@ Inside the `index-data` folder you will find another lambda. This one can be set
 recommend just manually triggering it from the console when you need to. It has been set up to allows an optional date
 range if you wish to only index data from a certain range (provided you have some field on your object like createdDate
 or updatedOn etc)
+
+PLEASE NOTE: you must give the correct privileges to this lambda:
+```
+  this.yourOpenSearchDomain.grantIndexReadWrite("your-index", this.yourIndexDataLambdaFunction);
+  this.indexMeTable.grantReadData(this.openSearchIndexPoliciesFunction.lambdaFunction);
+```
