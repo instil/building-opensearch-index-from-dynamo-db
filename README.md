@@ -8,7 +8,7 @@ Inside the `index-stream` directory you'll find the code for indexing remove/ins
 If you are unsure on how to set up a dynamo stream then check this out
 https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html#Streams.Enabling
 
-So if you are using CDK here is an example:
+Or if you are using CDK, here is an example of the table with a stream event:
 
 ```
   readonly someTable = new Table(this, "SomeTable", {
