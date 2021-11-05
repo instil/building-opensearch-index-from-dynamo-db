@@ -8,7 +8,7 @@ Inside the `index-stream` directory you'll find the code for indexing remove/ins
 If you are unsure on how to set up a dynamo stream then check this out
 https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html#Streams.Enabling
 
-Or if you are using CDK, here is an example of the table with a stream event:
+Or if you are using CDK, here is an example of a table with a stream event:
 
 ```
   const indexMeTable = new dynamodb.Table(this, "IndexMeTable", {
@@ -21,7 +21,7 @@ Or if you are using CDK, here is an example of the table with a stream event:
   });
 ```
 
-After this you just need to tell the stream where you want it to go:
+Assuming you have set up you Lambda in CDK (`yourIndexingLambdaFunction`), you then just need to tell the stream to head off to that lambda:
 
 ```
   yourIndexingLambdaFunction.addEventSource(new DynamoEventSource(this.someTable, {
@@ -42,7 +42,7 @@ recommend just manually triggering it from the console when you need to.
 
 PLEASE NOTE: you must give the correct privileges to this lambda:
 ```
-    yourOpenSearchDomain.grantReadWrite(yourDeleteIndexLambdaFunction);
+    yourOpenSearchDomain.grantIndexReadWrite("your-index", yourDeleteIndexLambdaFunction);
 ```
 
 ### Indexing existing data
