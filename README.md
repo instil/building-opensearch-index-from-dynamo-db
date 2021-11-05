@@ -21,7 +21,7 @@ Or if you are using CDK, here is an example of a table with a stream event:
   });
 ```
 
-Assuming you have set up you Lambda in CDK (`yourIndexingLambdaFunction`), you then just need to tell the stream to head off to that lambda:
+Assuming you have set up your Lambda in CDK (`yourIndexingLambdaFunction`), you then just need to tell the stream to head off to that lambda:
 
 ```
   yourIndexingLambdaFunction.addEventSource(new DynamoEventSource(this.someTable, {
