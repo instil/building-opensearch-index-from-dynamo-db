@@ -1,5 +1,7 @@
 ## Lambdas for OpenSearch with a DynamoDb source
 
+Check out the blog post explaining more about this setup here: https://instil.co/blog/opensearch-with-dynamodb/
+
 This contains lambdas to help handle OpenSearch with DynamoDb
 
 ### Indexing from a DynamoDb Stream
@@ -11,20 +13,20 @@ https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html#St
 Or if you are using CDK, here is an example of a table with a stream event:
 
 ```
-  const indexMeTable = new dynamodb.Table(this, "IndexMeTable", {
-    tableName: "index-me",
-    billingMode: BillingMode.PAY_PER_REQUEST,
-    partitionKey: {name: "partitionKey", type: AttributeType.STRING},
-    sortKey: {name: "sortKey", type: AttributeType.STRING},
-    pointInTimeRecovery: true,
-    stream: StreamViewType.NEW_IMAGE // This is the important line!
-  });
+const userTable = new Table(this, "UserTable", {
+  tableName: "user-table",
+  billingMode: BillingMode.PAY_PER_REQUEST,
+  partitionKey: {name: "partitionKey", type: AttributeType.STRING},
+  sortKey: {name: "sortKey", type: AttributeType.STRING},
+  pointInTimeRecovery: true,
+  stream: StreamViewType.NEW_IMAGE // This is the important line!
+});
 ```
 
-Assuming you have set up your Lambda in CDK (`yourIndexingLambdaFunction`), you then just need to tell the stream to head off to that lambda:
+Assuming you have set up your Lambda in CDK (`indexUserLambdaFunction`), you then just need to tell the stream to head off to that lambda:
 
 ```
-  yourIndexingLambdaFunction.addEventSource(new DynamoEventSource(this.someTable, {
+  indexUserLambdaFunction.addEventSource(new DynamoEventSource(this.userTable, {
     startingPosition: StartingPosition.TRIM_HORIZON,
     batchSize: 1,
     retryAttempts: 3
@@ -32,7 +34,7 @@ Assuming you have set up your Lambda in CDK (`yourIndexingLambdaFunction`), you 
 ```
 PLEASE NOTE: you must give the correct privileges to this lambda:
 ```
-    yourOpenSearchDomain.grantIndexReadWrite("your-index", yourIndexingLambdaFunction);
+    openSearchDomain.grantIndexReadWrite("user-index", indexUserLambdaFunction);
 ```
 
 ### Deleting an index
@@ -42,7 +44,7 @@ recommend just manually triggering it from the console when you need to.
 
 PLEASE NOTE: you must give the correct privileges to this lambda:
 ```
-    yourOpenSearchDomain.grantIndexReadWrite("your-index", yourDeleteIndexLambdaFunction);
+    openSearchDomain.grantIndexReadWrite("user-index", deleteIndexLambdaFunction);
 ```
 
 ### Indexing existing data
@@ -54,6 +56,6 @@ or updatedOn etc)
 
 PLEASE NOTE: you must give the correct privileges to this lambda:
 ```
-  yourOpenSearchDomain.grantIndexReadWrite("your-index", yourIndexDataLambdaFunction);
-  indexMeTable.grantReadData(yourIndexDataLambdaFunction);
+  openSearchDomain.grantIndexReadWrite("user-index", indexExistingDataLambdaFunction);
+  userTable.grantReadData(indexExistingDataLambdaFunction);
 ```
