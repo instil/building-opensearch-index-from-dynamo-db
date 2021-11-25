@@ -1,6 +1,7 @@
 import {DynamoDBStreamEvent} from "aws-lambda";
 import {DynamoDB} from "aws-sdk";
-import {indexDocumentInOpenSearch, removeDocumentFromOpenSearch, YourDocumentType} from "../service/OpenSearchService";
+import {indexDocumentInOpenSearch, removeDocumentFromOpenSearch} from "../service/OpenSearchService";
+import {User} from "../database/user/User";
 
 export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
     console.log("Received event from some table");
@@ -21,7 +22,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
                 if (!record.dynamodb.NewImage) continue;
 
                 console.log(`Received ${record.eventName.toLowerCase()} event from dynamo, indexing the document in OpenSearch`);
-                const document = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage) as YourDocumentType;
+                const document = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage) as User;
                 return await indexDocumentInOpenSearch(document, partitionKey, sortKey);
             }
         } catch (error) {

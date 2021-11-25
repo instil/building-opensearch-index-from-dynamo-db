@@ -1,43 +1,26 @@
-import {DataMapper, ScanIterator} from "@aws/dynamodb-data-mapper";
-import {attribute, hashKey, table} from "@aws/dynamodb-data-mapper-annotations";
+import {ScanIterator} from "@aws/dynamodb-data-mapper";
 import {ConditionExpression} from "@aws/dynamodb-expressions";
 import {indexDocument} from "../service/OpenSearchClient";
-import DynamoDB = require("aws-sdk/clients/dynamodb");
-import {YourDocumentType} from "../service/OpenSearchService";
-
-// of course move this dynamo mapper into a more appropriate place, and the table too
-export const dynamoDb = new DynamoDB({region: "your-region"});
-export const dynamoMapper = new DataMapper({client: dynamoDb});
-
-@table("index-me")
-export class YourDocumentTableObject {
-    @hashKey()
-    partitionKey!: string;
-
-    @hashKey()
-    sortKey!: string;
-
-    @attribute()
-    someValue!: string;
-}
+import {User} from "../database/user/User";
+import {dynamoMapper} from "../database/DynamoMapper";
 
 export interface IndexDataEvent {
     startDate?: string
     endDate?: string
 }
 
-const dateBeforeAnyPolicies = new Date(2021, 0, 1).toISOString();
+const aTimeLongAgo = new Date(1900, 0, 1).toISOString();
 
 export const handler = async (event: IndexDataEvent): Promise<void> => {
-    console.log("Received event to index values");
+    console.log("Received event to index existing user");
 
     try {
-        for await (const row of scanTableFor(event)) {
+        for await (const user of scanTableFor(event)) {
             try {
-                const documentId = `${row.partitionKey}_${row.sortKey}`;
-                await indexDocument(documentId, row as YourDocumentType);
+                const documentId = `${user.partitionKey}_${user.sortKey}`; // This creates a unique id for the document because pk and sk together make a unique value
+                await indexDocument(documentId, user as User);
             } catch (error) {
-                console.error("Error occurred trying to index row with pk", row.partitionKey, error);
+                console.error("Error occurred trying to index user with pk", user.partitionKey, error);
             }
         }
     } catch (error) {
@@ -46,22 +29,22 @@ export const handler = async (event: IndexDataEvent): Promise<void> => {
     }
 };
 
-function scanTableFor(event: IndexDataEvent): ScanIterator<YourDocumentTableObject> {
+function scanTableFor(event: IndexDataEvent): ScanIterator<User> {
     if (!event.startDate && !event.endDate) {
-        console.log("Start date and end date not set so fetching all data from the table");
-        return dynamoMapper.scan(YourDocumentTableObject);
+        console.log("Start date and end date not set so fetching all users from the table");
+        return dynamoMapper.scan(User);
     }
     console.log(`Setting up filter between start date: ${getStartDate(event.startDate)} and end date: ${getEndDate(event.endDate)}`);
-    return dynamoMapper.scan(YourDocumentTableObject, {filter: getFilterFor(event)});
+    return dynamoMapper.scan(User, {filter: getFilterFor(event)});
 }
 
 const getFilterFor = (event: IndexDataEvent): ConditionExpression => ({
     type: "Between",
-    subject: "updatedOn",
+    subject: "updatedOn", // this field could be different for you depending on how you structure your data in dynamo
     lowerBound: getStartDate(event.startDate),
     upperBound: getEndDate(event.endDate),
 });
 
-const getStartDate = (startDate?: string): string => startDate ?? dateBeforeAnyPolicies;
+const getStartDate = (startDate?: string): string => startDate ?? aTimeLongAgo;
 
 const getEndDate = (endDate?: string): string => endDate ?? new Date().toISOString();

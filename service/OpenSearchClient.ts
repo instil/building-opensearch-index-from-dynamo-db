@@ -3,11 +3,11 @@ import {SignatureV4} from "@aws-sdk/signature-v4";
 import {defaultProvider} from "@aws-sdk/credential-provider-node";
 import {Sha256} from "@aws-crypto/sha256-browser";
 import {HttpRequest} from "@aws-sdk/protocol-http";
-import {YourDocumentType} from "./OpenSearchService";
+import {User} from "../database/user/User";
 
 const type = "_doc";
-const domain = "your-open-search-domain.com";
-const index = "your-index";
+const domain = "your-open-search-domain.com"; // the best way to get this value into your lambdas is to set it as an environment variable in CDK
+const index = "user-index";
 
 export async function deleteIndex(): Promise<void> {
     const request = new HttpRequest({
@@ -37,7 +37,7 @@ export async function deleteDocument(documentId: string): Promise<void> {
     await execute(request);
 }
 
-export async function indexDocument(documentId: string, document: YourDocumentType): Promise<void> {
+export async function indexDocument(documentId: string, document: User): Promise<void> {
     const request = new HttpRequest({
         body: JSON.stringify(document),
         headers: {

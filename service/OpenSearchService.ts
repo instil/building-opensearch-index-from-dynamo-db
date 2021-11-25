@@ -1,8 +1,5 @@
 import {indexDocument, deleteDocument} from "./OpenSearchClient";
-
-export type YourDocumentType = {
-    someValue: string
-}
+import {User} from "../database/user/User";
 
 export async function removeDocumentFromOpenSearch(
   partitionKey: string | undefined,
@@ -20,7 +17,7 @@ export async function removeDocumentFromOpenSearch(
 }
 
 export async function indexDocumentInOpenSearch(
-  yourDocument: YourDocumentType,
+  user: User,
   partitionKey: string | undefined,
   sortKey: string | undefined
 ): Promise<void> {
@@ -32,6 +29,6 @@ export async function indexDocumentInOpenSearch(
   const documentId = `${partitionKey}_${sortKey}`;
   console.log("Indexing document in OpenSearch with id:", documentId);
 
-  await indexDocument(documentId, yourDocument);
+  await indexDocument(documentId, user);
 }
 
