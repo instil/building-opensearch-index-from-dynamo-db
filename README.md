@@ -23,10 +23,10 @@ const userTable = new Table(this, "UserTable", {
 });
 ```
 
-Assuming you have set up your Lambda in CDK (`indexUserLambdaFunction`), you then just need to tell the stream to head off to that lambda:
+Assuming you have set up your Lambda in CDK (`userTableStreamProcessorLambdaFunction`), you then just need to tell the stream to head off to that lambda:
 
 ```
-  indexUserLambdaFunction.addEventSource(new DynamoEventSource(this.userTable, {
+  userTableStreamProcessorLambdaFunction.addEventSource(new DynamoEventSource(this.userTable, {
     startingPosition: StartingPosition.TRIM_HORIZON,
     batchSize: 1,
     retryAttempts: 3
@@ -34,7 +34,7 @@ Assuming you have set up your Lambda in CDK (`indexUserLambdaFunction`), you the
 ```
 PLEASE NOTE: you must give the correct privileges to this lambda:
 ```
-    openSearchDomain.grantIndexReadWrite("user-index", indexUserLambdaFunction);
+    openSearchDomain.grantIndexReadWrite("user-index", userTableStreamProcessorLambdaFunction);
 ```
 
 ### Deleting an index
@@ -50,9 +50,9 @@ PLEASE NOTE: you must give the correct privileges to this lambda:
 ### Indexing existing data
 
 Inside the `index-data` folder you will find another lambda. This one can be set up to have a trigger, however I would
-recommend just manually triggering it from the console when you need to. It has been set up to allows an optional date
-range if you wish to only index data from a certain range (provided you have some field on your object like createdDate
-or updatedOn etc)
+recommend just manually triggering it from the console when you need to. It has been set up to allow an optional date
+range if you wish to only index data inside a that range (provided you have some field on your object like createdDate
+or updatedOn etc). Otherwise the lambda will index all the data.
 
 PLEASE NOTE: you must give the correct privileges to this lambda:
 ```
